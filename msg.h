@@ -18,9 +18,9 @@ struct message
 	int size;
 	
 	/**
- 	 * Prints the structure
- 	 * @param fp - the file stream to print to
- 	 */
+	 * Prints the structure
+	 * @param fp - the file stream to print to
+	 */
 	void print(FILE* fp)
 	{
 		fprintf(fp, "%ld %d", mtype, size);

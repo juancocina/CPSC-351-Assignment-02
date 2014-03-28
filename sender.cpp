@@ -23,22 +23,31 @@ void* sharedMemPtr;
 void init(int& shmid, int& msqid, void*& sharedMemPtr)
 {
 	/* TODO: 
-        1. Create a file called keyfile.txt containing string "Hello world" (you may do
- 		    so manually or from the code).
-	    2. Use ftok("keyfile.txt", 'a') in order to generate the key.
+		1. Create a file called keyfile.txt containing string "Hello world" (you may do
+			so manually or from the code).
+		2. Use ftok("keyfile.txt", 'a') in order to generate the key.
 		3. Use the key in the TODO's below. Use the same key for the queue
-		    and the shared memory segment. This also serves to illustrate the difference
-		    between the key and the id used in message queues and shared memory. The id
-		    for any System V objest (i.e. message queues, shared memory, and sempahores) 
-		    is unique system-wide among all SYstem V objects. Two objects, on the other hand,
-		    may have the same key.
+			and the shared memory segment. This also serves to illustrate the difference
+			between the key and the id used in message queues and shared memory. The id
+			for any System V objest (i.e. message queues, shared memory, and sempahores) 
+			is unique system-wide among all SYstem V objects. Two objects, on the other hand,
+			may have the same key.
 	 */
 	
+	/*	Checklist:
+		1...2...3...
+	 */
+	key_t key = ftok("keyfile.txt", 'a');
 
-	
 	/* TODO: Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
+	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, 0644 | IPC_CREAT);
+
 	/* TODO: Attach to the shared memory */
+	sharedMemPtr = shmat(shmid, 0, 0);
+
 	/* TODO: Attach to the message queue */
+	msqid = msgget(key, 0666 | IPC_CREAT);
+
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
 	
 }
@@ -81,9 +90,9 @@ void send(const char* fileName)
 	while(!feof(fp))
 	{
 		/* Read at most SHARED_MEMORY_CHUNK_SIZE from the file and store them in shared memory. 
- 		 * fread will return how many bytes it has actually read (since the last chunk may be less
- 		 * than SHARED_MEMORY_CHUNK_SIZE).
- 		 */
+		 * fread will return how many bytes it has actually read (since the last chunk may be less
+		 * than SHARED_MEMORY_CHUNK_SIZE).
+		 */
 		if((sndMsg.size = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
 		{
 			perror("fread");
@@ -92,18 +101,18 @@ void send(const char* fileName)
 		
 			
 		/* TODO: Send a message to the receiver telling him that the data is ready 
- 		 * (message of type SENDER_DATA_TYPE) 
- 		 */
+		 * (message of type SENDER_DATA_TYPE) 
+		 */
 		
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
- 		 * that he finished saving the memory chunk. 
- 		 */
+		 * that he finished saving the memory chunk. 
+		 */
 	}
 	
 
 	/** TODO: once we are out of the above loop, we have finished sending the file.
- 	  * Lets tell the receiver that we have nothing more to send. We will do this by
- 	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
+	  * Lets tell the receiver that we have nothing more to send. We will do this by
+	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
 
 		

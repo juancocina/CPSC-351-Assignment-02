@@ -15,5 +15,3 @@ recv.o:	recv.cpp
 
 clean:
 	rm -rf *.o sender recv 
-
-
