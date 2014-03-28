@@ -62,6 +62,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
+	// Maybe more complicated...
 	shmdt(sharedMemPtr);
 }
 
@@ -105,6 +106,7 @@ void send(const char* fileName)
 		/* TODO: Send a message to the receiver telling him that the data is ready 
 		 * (message of type SENDER_DATA_TYPE) 
 		 */
+		msgsnd(msqid, &sndMsg, SHARED_MEMORY_CHUNK_SIZE, 0);
 		
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
 		 * that he finished saving the memory chunk. 
