@@ -86,6 +86,11 @@ void mainLoop()
 	 * "recvfile"
 	 */
 
+	// Not sure about this...
+	message rcvMsg;
+	msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 2, 0);
+	msgSize = rcvMsg.size;
+
 	/* Keep receiving until the sender set the size to 0, indicating that
 	 * there is no more data to send
 	 */ 
