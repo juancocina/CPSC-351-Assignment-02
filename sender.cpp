@@ -36,6 +36,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	
 	/*	Checklist:
 		1...2...3...
+		COMPLETED!
 	 */
 	key_t key = ftok("keyfile.txt", 'a');
 
@@ -75,7 +76,7 @@ void send(const char* fileName)
 	
 
 	/* A buffer to store message we will send to the receiver. */
-	message sndMsg; 
+	message sndMsg;
 	
 	/* A buffer to store message received from the receiver. */
 	message rcvMsg;
