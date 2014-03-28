@@ -38,19 +38,45 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		1...2...3...
 		COMPLETED!
 	 */
+	printf("Initializing everything...\n");
 	key_t key = ftok("keyfile.txt", 'a');
+
+	if (key == -1)
+	{
+		perror("ftok");
+        exit(1);
+	}
 
 	/* TODO: Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
 	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, 0644 | IPC_CREAT);
 
+	if (shmid == -1)
+	{
+		perror("shmget");
+        exit(1);
+	}
+
 	/* TODO: Attach to the shared memory */
 	sharedMemPtr = shmat(shmid, (void *)0, 0);
+
+	if (sharedMemPtr == (void *) -1)
+	{
+		perror("shmat");
+        exit(1);
+	}
 
 	/* TODO: Attach to the message queue */
 	msqid = msgget(key, 0666 | IPC_CREAT);
 
+	if (msqid == -1)
+	{
+		perror("msgget");
+        exit(1);
+	}
+
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
 	
+	printf("...everything initialized correctly!\n\n");
 }
 
 /**
@@ -102,20 +128,26 @@ void send(const char* fileName)
 			exit(-1);
 		}
 		
+		printf("Starting sender program...\n");
+
 		/* TODO: Send a message to the receiver telling him that the data is ready 
 		 * (message of type SENDER_DATA_TYPE) 
 		 */
-		sndMsg.mtype = 1;
+		sndMsg.mtype = SENDER_DATA_TYPE;
+		printf("DEBUG: Size of Message(%d) Message Type(%ld)\n", sndMsg.size, sndMsg.mtype);
 
+		//sndMsg.print(fp);
+		//printf("DEBUG: Printed FP!\n");
 		printf("Sending message...\n");
-		sndMsg.print(fp);
 		msgsnd(msqid, &sndMsg, SHARED_MEMORY_CHUNK_SIZE, 0);
+		printf("...message sent!\n");
 		
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
 		 * that he finished saving the memory chunk. 
 		 */
 		printf("Recieving message...\n");
-		msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 2, 0);
+		msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, RECV_DONE_TYPE, 0);
+		printf("...message recieved!\n");
 	}
 	
 

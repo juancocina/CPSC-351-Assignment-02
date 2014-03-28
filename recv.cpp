@@ -86,14 +86,18 @@ void mainLoop()
 	 * "recvfile"
 	 */
 
+	printf("Starting reciever program...\n");
+
 	// Not sure about this...
 	message sndMsg;
+	message rcvMsg;
+	printf("...created message to store info...\n");
 
 	// Not sure about this either...
-	printf("...recieved!\n");
-	message rcvMsg;
 	msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 1, 0);
 	msgSize = rcvMsg.size;
+	printf("...recieved!\n");
+	printf("DEBUG: %d %ld\n", rcvMsg.size, rcvMsg.mtype);
 
 	/* Keep receiving until the sender set the size to 0, indicating that
 	 * there is no more data to send
