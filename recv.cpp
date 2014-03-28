@@ -29,10 +29,11 @@ const char recvFileName[] = "recvfile";
 void init(int& shmid, int& msqid, void*& sharedMemPtr)
 {
 	
-	/* TODO: 1. Create a file called keyfile.txt containing string "Hello world" (you may do
+	/* TODO: 
+		1. Create a file called keyfile.txt containing string "Hello world" (you may do
 			so manually or from the code).
-			 2. Use ftok("keyfile.txt", 'a') in order to generate the key.
-		 3. Use the key in the TODO's below. Use the same key for the queue
+		2. Use ftok("keyfile.txt", 'a') in order to generate the key.
+		3. Use the key in the TODO's below. Use the same key for the queue
 			and the shared memory segment. This also serves to illustrate the difference
 			between the key and the id used in message queues and shared memory. The id
 			for any System V object (i.e. message queues, shared memory, and sempahores) 
@@ -40,9 +41,17 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 			may have the same key.
 	 */
 	
+	key_t key = ftok("keyfile.txt", 'a');
+
 	/* TODO: Allocate a piece of shared memory. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE. */
+	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, 0644 | IPC_CREAT);
+
 	/* TODO: Attach to the shared memory */
+	sharedMemPtr = shmat(shmid, (void *)0, 0);
+
 	/* TODO: Create a message queue */
+	msqid = msgget(key, 0666 | IPC_CREAT);
+
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
 	
 }
