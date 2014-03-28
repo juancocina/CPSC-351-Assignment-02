@@ -38,45 +38,41 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		1...2...3...
 		COMPLETED!
 	 */
-	printf("Initializing everything...\n");
+	printf("Initializing everything in sender...\n");
 	key_t key = ftok("keyfile.txt", 'a');
-
 	if (key == -1)
 	{
 		perror("ftok");
-        exit(1);
+		exit(1);
 	}
 
 	/* TODO: Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
 	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, 0644 | IPC_CREAT);
-
 	if (shmid == -1)
 	{
 		perror("shmget");
-        exit(1);
+		exit(1);
 	}
 
 	/* TODO: Attach to the shared memory */
 	sharedMemPtr = shmat(shmid, (void *)0, 0);
-
 	if (sharedMemPtr == (void *) -1)
 	{
 		perror("shmat");
-        exit(1);
+		exit(1);
 	}
 
 	/* TODO: Attach to the message queue */
 	msqid = msgget(key, 0666 | IPC_CREAT);
-
 	if (msqid == -1)
 	{
 		perror("msgget");
-        exit(1);
+		exit(1);
 	}
 
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
 	
-	printf("...everything initialized correctly!\n\n");
+	printf("...everything initialized in sender correctly!\n\n");
 }
 
 /**
@@ -89,7 +85,9 @@ void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
 	// Maybe more complicated...
+	printf("Detatching from shared memory...\n");
 	shmdt(sharedMemPtr);
+	printf("...detached!\n");
 }
 
 /**
@@ -136,8 +134,6 @@ void send(const char* fileName)
 		sndMsg.mtype = SENDER_DATA_TYPE;
 		printf("DEBUG: Size of Message(%d) Message Type(%ld)\n", sndMsg.size, sndMsg.mtype);
 
-		//sndMsg.print(fp);
-		//printf("DEBUG: Printed FP!\n");
 		printf("Sending message...\n");
 		msgsnd(msqid, &sndMsg, SHARED_MEMORY_CHUNK_SIZE, 0);
 		printf("...message sent!\n");

@@ -40,20 +40,41 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 			is unique system-wide among all System V objects. Two objects, on the other hand,
 			may have the same key.
 	 */
-	
+	printf("Iniitalizing everything in reciever...\n");
 	key_t key = ftok("keyfile.txt", 'a');
+
+	if (key == -1)
+	{
+		perror("ftok");
+		exit(1);
+	}
 
 	/* TODO: Allocate a piece of shared memory. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE. */
 	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, 0644 | IPC_CREAT);
+	if (shmid == -1)
+	{
+		perror("shmget");
+		exit(1);
+	}
 
 	/* TODO: Attach to the shared memory */
 	sharedMemPtr = shmat(shmid, (void *)0, 0);
+	if (sharedMemPtr == (void *) -1)
+	{
+		perror("shmat");
+		exit(1);
+	}
 
 	/* TODO: Create a message queue */
 	msqid = msgget(key, 0666 | IPC_CREAT);
+	if (msqid == -1)
+	{
+		perror("msgget");
+		exit(1);
+	}
 
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
-	
+	printf("...everything initialized in reciever correctly!\n\n");
 }
  
 
@@ -94,7 +115,7 @@ void mainLoop()
 	printf("...created message to store info...\n");
 
 	// Not sure about this either...
-	msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 1, 0);
+	msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, RECV_DONE_TYPE, 0);
 	msgSize = rcvMsg.size;
 	printf("...recieved!\n");
 	printf("DEBUG: %d %ld\n", rcvMsg.size, rcvMsg.mtype);
@@ -139,6 +160,7 @@ void mainLoop()
  */
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
+	printf("Oops! trying to clean up. Not implemented yet!\n");
 	/* TODO: Detach from shared memory */
 	
 	/* TODO: Deallocate the shared memory chunk */
@@ -152,6 +174,7 @@ void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
  */
 void ctrlCSignal(int signal)
 {
+	printf("Ctrl-C has been pressed, going to clean up...\n");
 	/* Free system V resources */
 	cleanUp(shmid, msqid, sharedMemPtr);
 }
