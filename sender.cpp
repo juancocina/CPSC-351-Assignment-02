@@ -43,7 +43,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, 0644 | IPC_CREAT);
 
 	/* TODO: Attach to the shared memory */
-	sharedMemPtr = shmat(shmid, 0, 0);
+	sharedMemPtr = shmat(shmid, (void *)0, 0);
 
 	/* TODO: Attach to the message queue */
 	msqid = msgget(key, 0666 | IPC_CREAT);
