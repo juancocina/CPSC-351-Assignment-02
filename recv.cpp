@@ -87,8 +87,11 @@ void mainLoop()
 	 */
 
 	// Not sure about this...
+	message sndMsg;
+
+	// Not sure about this either...
 	message rcvMsg;
-	msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 2, 0);
+	msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 1, 0);
 	msgSize = rcvMsg.size;
 
 	/* Keep receiving until the sender set the size to 0, indicating that
@@ -109,6 +112,7 @@ void mainLoop()
 			 * I.e. send a message of type RECV_DONE_TYPE (the value of size field
 			 * does not matter in this case). 
 			 */
+			msgsnd(msqid, &sndMsg, 0, 0);
 		}
 		/* We are done */
 		else

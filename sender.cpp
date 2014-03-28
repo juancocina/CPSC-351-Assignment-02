@@ -111,6 +111,7 @@ void send(const char* fileName)
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
 		 * that he finished saving the memory chunk. 
 		 */
+		msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 2, 0);
 	}
 	
 
