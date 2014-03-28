@@ -90,6 +90,7 @@ void mainLoop()
 	message sndMsg;
 
 	// Not sure about this either...
+	printf("...recieved!\n");
 	message rcvMsg;
 	msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 1, 0);
 	msgSize = rcvMsg.size;
@@ -99,6 +100,7 @@ void mainLoop()
 	 */ 
 	while(msgSize != 0)
 	{   
+		printf("...looping...\n");
 		/* If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{

@@ -102,15 +102,19 @@ void send(const char* fileName)
 			exit(-1);
 		}
 		
-			
 		/* TODO: Send a message to the receiver telling him that the data is ready 
 		 * (message of type SENDER_DATA_TYPE) 
 		 */
+		sndMsg.mtype = 1;
+
+		printf("Sending message...\n");
+		sndMsg.print(fp);
 		msgsnd(msqid, &sndMsg, SHARED_MEMORY_CHUNK_SIZE, 0);
 		
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
 		 * that he finished saving the memory chunk. 
 		 */
+		printf("Recieving message...\n");
 		msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, 2, 0);
 	}
 	
