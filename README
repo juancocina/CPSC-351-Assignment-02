@@ -1,0 +1,11 @@
+CPSC 351
+Assignment 02
+
+Maira Ahmad
+Taner Scott
+David McLaren
+
+How to run:
+	compile: make
+	execute: ./sender <FILE NAME>
+			 ./recv
