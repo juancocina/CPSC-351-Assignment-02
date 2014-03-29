@@ -159,7 +159,7 @@ void mainLoop()
 		/* We are done */
 		else
 		{
-			printf("\nEmpty file recieved. Closing file...\n");
+			printf("Empty file recieved. Closing file...\n");
 
 			/* Close the file */
 			fclose(fp);

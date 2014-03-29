@@ -162,8 +162,11 @@ void send(const char* fileName)
 	  * Lets tell the receiver that we have nothing more to send. We will do this by
 	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
-	printf("Sending empty message...\n");
+	sndMsg.size = 0;
 	sndMsg.mtype = SENDER_DATA_TYPE;
+	printf("Sending empty message...\n");
+	printf("DEBUG: Message Size %d Message Type %ld\n", rcvMsg.size, rcvMsg.mtype);
+	printf("DEBUG: Message Struct Size %lu\n", sizeof(rcvMsg) - sizeof(long));
 	if(msgsnd(msqid, &sndMsg, sizeof(sndMsg) - sizeof(long), 0) == -1)
 	{
 		perror("msgsnd");
