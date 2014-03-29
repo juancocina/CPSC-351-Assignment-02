@@ -78,6 +78,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	printf("...everything initialized in sender correctly!\n\n");
 }
 
+
 /**
  * Performs the cleanup functions
  * @param sharedMemPtr - the pointer to the shared memory
@@ -92,6 +93,7 @@ void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 	shmdt(sharedMemPtr);
 	printf("...detached!\n");
 }
+
 
 /**
  * The main send function
@@ -127,8 +129,6 @@ void send(const char* fileName)
 			perror("fread");
 			exit(-1);
 		}
-		
-		printf("DEBUG: sndMsg.size(%d)\n", sndMsg.size);
 
 		printf("Starting sender program...\n");
 

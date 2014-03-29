@@ -39,7 +39,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 			is unique system-wide among all System V objects. Two objects, on the other hand,
 			may have the same key.
 	 */
-	printf("Iniitalizing everything in reciever...\n");
+	printf("Initalizing everything in reciever...\n");
 	key_t key = ftok("keyfile.txt", 'a');
 	if (key == -1)
 	{
@@ -106,35 +106,21 @@ void mainLoop()
 	 * "recvfile"
 	 */
 
-	printf("Starting reciever program...\n");
-
-	// Not sure about this...
+	// Create messages to send and recieve!
 	message sndMsg;
 	message rcvMsg;
 	printf("...created message to store info...\n");
 
-	//Test this out...
-	/*
-	if((msgSize = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
-	{
-		perror("fread");
-		exit(-1);
-	}
-	 */
+	// Important: Add +1 to keep the null terminator \0 at the end!
+	printf("DEBUG: msqid(%d)\n", msqid);
 	printf("Reading in message...\n");
-	
-	printf("DEBUG: msgSize(%d)\n", msgSize);
-	printf("DEBUG: \n");
-
-	// Not sure about this either...
-	/*
-	if(msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, SENDER_DATA_TYPE, 0) == -1)
+	if(msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE+1, SENDER_DATA_TYPE, 0) == -1)
 	{
 		perror("msgrcv");
-        exit(1);
-    }
-    */
-	msgSize = SHARED_MEMORY_CHUNK_SIZE;
+		exit(1);
+	}
+	
+	msgSize = rcvMsg.size + 1;
 	printf("...recieved!\n");
 	printf("DEBUG: %d %ld\n", rcvMsg.size, rcvMsg.mtype);
 
@@ -143,21 +129,26 @@ void mainLoop()
 	 */ 
 	while(msgSize != 0)
 	{   
-		printf("...looping...\n");
+		printf("...looping...\n\n");
 		/* If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
+			printf("Going to write to file...\n");
+			//This below fails!
 			/* Save the shared memory to file */
 			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) == 0)
 			{
 				perror("fwrite");
 			}
+			printf("...wrote to file!\n");
 			
 			/* TODO: Tell the sender that we are ready for the next file chunk. 
 			 * I.e. send a message of type RECV_DONE_TYPE (the value of size field
 			 * does not matter in this case). 
 			 */
+			printf("ending empty message back...\n");
 			msgsnd(msqid, &sndMsg, 0, 0);
+			printf("...sent!\n");
 		}
 		/* We are done */
 		else
@@ -167,7 +158,6 @@ void mainLoop()
 		}
 	}
 }
-
 
 
 /**
@@ -185,13 +175,14 @@ void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 	
 	/* TODO: Deallocate the shared memory chunk */
 	//This isn't working...
-	delete(&sharedMemPtr);
+	shmctl(shmid, IPC_RMID, NULL);
 	printf("Deallocated shared memory chunk...\n");
 	
 	/* TODO: Deallocate the message queue */
-	shmctl(shmid, IPC_RMID, NULL);
+	msgctl(msqid, IPC_RMID, NULL);
 	printf("Deallocated the message queue...\n");
 }
+
 
 /**
  * Handles the exit signal
@@ -217,6 +208,7 @@ int main(int argc, char** argv)
 	/* Initialize */
 	init(shmid, msqid, sharedMemPtr);
 	
+	printf("Starting reciever program...\n");
 	/* Go to the main loop */
 	mainLoop();
 
