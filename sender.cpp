@@ -149,7 +149,11 @@ void send(const char* fileName)
 		 * that he finished saving the memory chunk. 
 		 */
 		printf("Recieving message...\n");
-		msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, RECV_DONE_TYPE, 0);
+		if(msgrcv(msqid, &rcvMsg, 0, RECV_DONE_TYPE, 0))
+		{
+			perror("msgrcv");
+			exit(1);
+		}
 		printf("...message recieved!\n");
 	}
 	
@@ -158,10 +162,16 @@ void send(const char* fileName)
 	  * Lets tell the receiver that we have nothing more to send. We will do this by
 	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
-	msgsnd(msqid, &sndMsg, 0, 0);
+	printf("Sending empty message...\n");
+	if(msgsnd(msqid, &sndMsg, 0, 0) == -1)
+	{
+		perror("msgsnd");
+	}
+	printf("...sent!\n");
 		
 	/* Close the file */
 	fclose(fp);
+	printf("Closed file.\n");
 }
 
 int main(int argc, char** argv)

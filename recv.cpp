@@ -110,49 +110,58 @@ void mainLoop()
 	message sndMsg;
 	message rcvMsg;
 	printf("...created message to store info...\n");
-
-	// Important: Add +1 to keep the null terminator \0 at the end!
-	printf("DEBUG: msqid(%d)\n", msqid);
-	printf("Reading in message...\n");
-	if(msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE+1, SENDER_DATA_TYPE, 0) == -1)
-	{
-		perror("msgrcv");
-		exit(1);
-	}
-	
-	msgSize = rcvMsg.size + 1;
-	printf("...recieved!\n");
-	printf("DEBUG: %d %ld\n", rcvMsg.size, rcvMsg.mtype);
+	msgSize = 1;
 
 	/* Keep receiving until the sender set the size to 0, indicating that
 	 * there is no more data to send
 	 */ 
 	while(msgSize != 0)
 	{   
-		printf("...looping...\n\n");
+		// Important: Add +1 to keep the null terminator \0 at the end!
+		printf("Reading in message...\n");
+		if(msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE+1, SENDER_DATA_TYPE, 0) == -1)
+		{
+			perror("msgrcv");
+			exit(1);
+		}
+		
+		msgSize = rcvMsg.size;
+		printf("...recieved!\n");
+		printf("DEBUG: Message Size %d Message Type %ld\n", rcvMsg.size, rcvMsg.mtype);
+
+		printf("\n...looping...\n\n");
 		/* If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
 			printf("Going to write to file...\n");
 			//This below fails!
 			/* Save the shared memory to file */
+			/*
 			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) == 0)
 			{
 				perror("fwrite");
 			}
+			*/
 			printf("...wrote to file!\n");
 			
 			/* TODO: Tell the sender that we are ready for the next file chunk. 
 			 * I.e. send a message of type RECV_DONE_TYPE (the value of size field
 			 * does not matter in this case). 
 			 */
-			printf("ending empty message back...\n");
-			msgsnd(msqid, &sndMsg, 0, 0);
+			sndMsg.mtype = RECV_DONE_TYPE;
+			sndMsg.size = 0
+			printf("Sending empty message back...\n");
+			if(msgsnd(msqid, &sndMsg, 0, 0) == -1)
+			{
+				perror("msgsnd");
+			}
 			printf("...sent!\n");
 		}
 		/* We are done */
 		else
 		{
+			printf("\nEmpty file recieved. Closing file...\n");
+
 			/* Close the file */
 			fclose(fp);
 		}
