@@ -18,7 +18,6 @@ void *sharedMemPtr;
 /* The name of the received file */
 const char recvFileName[] = "recvfile";
 
-
 /**
  * Sets up the shared memory segment and message queue
  * @param shmid - the id of the allocated shared memory 
@@ -42,7 +41,6 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	 */
 	printf("Iniitalizing everything in reciever...\n");
 	key_t key = ftok("keyfile.txt", 'a');
-
 	if (key == -1)
 	{
 		perror("ftok");
@@ -50,7 +48,7 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	}
 
 	/* TODO: Allocate a piece of shared memory. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE. */
-	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, 0644 | IPC_CREAT);
+	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, 0644);
 	if (shmid == -1)
 	{
 		perror("shmget");
@@ -66,15 +64,16 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	}
 
 	/* TODO: Create a message queue */
-	msqid = msgget(key, 0666 | IPC_CREAT);
+	msqid = msgget(key, 0666);
 	if (msqid == -1)
 	{
 		perror("msgget");
 		exit(1);
 	}
+	printf("DEBUG: msqid(%d)\n", msqid);
 
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
-	printf("...everything initialized in reciever correctly!\n\n");
+	printf("...everything initialized in correctly!\n\n");
 }
  
 
@@ -114,9 +113,28 @@ void mainLoop()
 	message rcvMsg;
 	printf("...created message to store info...\n");
 
+	//Test this out...
+	/*
+	if((msgSize = fread(sharedMemPtr, sizeof(char), SHARED_MEMORY_CHUNK_SIZE, fp)) < 0)
+	{
+		perror("fread");
+		exit(-1);
+	}
+	 */
+	printf("Reading in message...\n");
+	
+	printf("DEBUG: msgSize(%d)\n", msgSize);
+	printf("DEBUG: \n");
+
 	// Not sure about this either...
-	msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, RECV_DONE_TYPE, 0);
-	msgSize = rcvMsg.size;
+	/*
+	if(msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE, SENDER_DATA_TYPE, 0) == -1)
+	{
+		perror("msgrcv");
+        exit(1);
+    }
+    */
+	msgSize = SHARED_MEMORY_CHUNK_SIZE;
 	printf("...recieved!\n");
 	printf("DEBUG: %d %ld\n", rcvMsg.size, rcvMsg.mtype);
 
@@ -130,7 +148,7 @@ void mainLoop()
 		if(msgSize != 0)
 		{
 			/* Save the shared memory to file */
-			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) < 0)
+			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) == 0)
 			{
 				perror("fwrite");
 			}
@@ -160,12 +178,19 @@ void mainLoop()
  */
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
-	printf("Oops! trying to clean up. Not implemented yet!\n");
+	//printf("Oops! trying to clean up. Not implemented yet!\n");
 	/* TODO: Detach from shared memory */
+	shmdt(sharedMemPtr);
+	printf("Detached from shared memory...\n");
 	
 	/* TODO: Deallocate the shared memory chunk */
+	//This isn't working...
+	delete(&sharedMemPtr);
+	printf("Deallocated shared memory chunk...\n");
 	
 	/* TODO: Deallocate the message queue */
+	shmctl(shmid, IPC_RMID, NULL);
+	printf("Deallocated the message queue...\n");
 }
 
 /**
@@ -174,7 +199,7 @@ void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
  */
 void ctrlCSignal(int signal)
 {
-	printf("Ctrl-C has been pressed, going to clean up...\n");
+	printf("\nCtrl-C has been pressed, going to clean up...\n");
 	/* Free system V resources */
 	cleanUp(shmid, msqid, sharedMemPtr);
 }
@@ -187,6 +212,7 @@ int main(int argc, char** argv)
 	 * queues and shared memory before exiting. You may add the cleaning functionality
 	 * in ctrlCSignal().
 	 */
+	signal(SIGINT, ctrlCSignal);
 				
 	/* Initialize */
 	init(shmid, msqid, sharedMemPtr);
@@ -195,6 +221,7 @@ int main(int argc, char** argv)
 	mainLoop();
 
 	/** TODO: Detach from shared memory segment, and deallocate shared memory and message queue (i.e. call cleanup) **/
+	cleanUp(shmid, msqid, sharedMemPtr);
 		
 	return 0;
 }

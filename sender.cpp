@@ -69,9 +69,12 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		perror("msgget");
 		exit(1);
 	}
+	printf("DEBUG: msqid(%d)\n", msqid);
 
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
-	
+
+	//printf("%d\n", msgctl(msqid, sharedMemPtr, 0));
+
 	printf("...everything initialized in sender correctly!\n\n");
 }
 
@@ -99,7 +102,6 @@ void send(const char* fileName)
 	/* Open the file for reading */
 	FILE* fp = fopen(fileName, "r");
 	
-
 	/* A buffer to store message we will send to the receiver. */
 	message sndMsg;
 	
@@ -126,6 +128,8 @@ void send(const char* fileName)
 			exit(-1);
 		}
 		
+		printf("DEBUG: sndMsg.size(%d)\n", sndMsg.size);
+
 		printf("Starting sender program...\n");
 
 		/* TODO: Send a message to the receiver telling him that the data is ready 
@@ -135,7 +139,10 @@ void send(const char* fileName)
 		printf("DEBUG: Size of Message(%d) Message Type(%ld)\n", sndMsg.size, sndMsg.mtype);
 
 		printf("Sending message...\n");
-		msgsnd(msqid, &sndMsg, SHARED_MEMORY_CHUNK_SIZE, 0);
+		if(msgsnd(msqid, &sndMsg, SHARED_MEMORY_CHUNK_SIZE, 0) == -1)
+		{
+			perror("msgsnd");
+		}
 		printf("...message sent!\n");
 		
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
@@ -151,7 +158,7 @@ void send(const char* fileName)
 	  * Lets tell the receiver that we have nothing more to send. We will do this by
 	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
-
+	msgsnd(msqid, &sndMsg, 0, 0);
 		
 	/* Close the file */
 	fclose(fp);
