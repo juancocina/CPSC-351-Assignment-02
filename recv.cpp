@@ -128,6 +128,7 @@ void mainLoop()
 		msgSize = rcvMsg.size;
 		printf("...recieved!\n");
 		printf("DEBUG: Message Size %d Message Type %ld\n", rcvMsg.size, rcvMsg.mtype);
+		printf("DEBUG: Message Struct Size %lu\n", sizeof(rcvMsg) - sizeof(long));
 
 		printf("\n...looping...\n\n");
 		/* If the sender is not telling us that we are done, then get to work */

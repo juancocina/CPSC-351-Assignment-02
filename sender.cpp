@@ -163,7 +163,8 @@ void send(const char* fileName)
 	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
 	printf("Sending empty message...\n");
-	if(msgsnd(msqid, &sndMsg, 0, 0) == -1)
+	sndMsg.mtype = SENDER_DATA_TYPE;
+	if(msgsnd(msqid, &sndMsg, sizeof(sndMsg) - sizeof(long), 0) == -1)
 	{
 		perror("msgsnd");
 	}
