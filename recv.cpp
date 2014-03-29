@@ -119,7 +119,7 @@ void mainLoop()
 	{   
 		// Important: Add +1 to keep the null terminator \0 at the end!
 		printf("Reading in message...\n");
-		if(msgrcv(msqid, &rcvMsg, SHARED_MEMORY_CHUNK_SIZE+1, SENDER_DATA_TYPE, 0) == -1)
+		if(msgrcv(msqid, &rcvMsg, sizeof(rcvMsg) - sizeof(long), SENDER_DATA_TYPE, 0) == -1)
 		{
 			perror("msgrcv");
 			exit(1);
@@ -136,12 +136,10 @@ void mainLoop()
 			printf("Going to write to file...\n");
 			//This below fails!
 			/* Save the shared memory to file */
-			/*
 			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) == 0)
 			{
 				perror("fwrite");
 			}
-			*/
 			printf("...wrote to file!\n");
 			
 			/* TODO: Tell the sender that we are ready for the next file chunk. 
@@ -149,7 +147,7 @@ void mainLoop()
 			 * does not matter in this case). 
 			 */
 			sndMsg.mtype = RECV_DONE_TYPE;
-			sndMsg.size = 0
+			sndMsg.size = 0;
 			printf("Sending empty message back...\n");
 			if(msgsnd(msqid, &sndMsg, 0, 0) == -1)
 			{

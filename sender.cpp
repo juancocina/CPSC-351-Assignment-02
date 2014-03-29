@@ -139,7 +139,7 @@ void send(const char* fileName)
 		printf("DEBUG: Size of Message(%d) Message Type(%ld)\n", sndMsg.size, sndMsg.mtype);
 
 		printf("Sending message...\n");
-		if(msgsnd(msqid, &sndMsg, SHARED_MEMORY_CHUNK_SIZE, 0) == -1)
+		if(msgsnd(msqid, &sndMsg, sizeof(sndMsg) - sizeof(long), 0) == -1)
 		{
 			perror("msgsnd");
 		}
